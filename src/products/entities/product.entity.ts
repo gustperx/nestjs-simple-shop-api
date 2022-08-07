@@ -44,6 +44,7 @@ export class Product {
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc blandit rutrum condimentum.',
     description: 'Product description',
     default: null,
+    required: false,
   })
   @Column('text', {
     nullable: true,
@@ -54,11 +55,12 @@ export class Product {
     example: 'product_demo_slug',
     description: 'Product Slug',
     uniqueItems: true,
+    required: false,
   })
   @Column('text', {
     unique: true,
   })
-  slug: string;
+  slug?: string;
 
   @ApiProperty({
     example: 'Product model',
@@ -71,6 +73,7 @@ export class Product {
     example: ['Shoes', 'Red'],
     description: 'Product tags',
     default: [],
+    required: false,
   })
   @Column('text', {
     array: true,
@@ -82,6 +85,7 @@ export class Product {
     example: ['http://image1.jpg', 'http://image2.jpg'],
     description: 'Product images',
     default: [],
+    required: false,
   })
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {
     cascade: true,

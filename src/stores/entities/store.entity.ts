@@ -30,6 +30,7 @@ export class Store {
   @ApiProperty({
     example: 'https://storename.com',
     description: 'Store URL',
+    required: false,
   })
   @Column('text', {
     nullable: true,
@@ -40,6 +41,7 @@ export class Store {
     example: 'store_slug',
     description: 'Store Slug',
     uniqueItems: true,
+    required: false,
   })
   @Column('text', {
     unique: true,
