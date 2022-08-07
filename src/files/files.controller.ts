@@ -8,7 +8,13 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -17,6 +23,9 @@ import { diskStorage } from 'multer';
 
 import { FilesService } from './files.service';
 import { fileFilter, fileNamer } from './helpers';
+import { Auth } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/interfaces';
+import { FileUploadDto } from './dto/file-upload.dto';
 
 @ApiTags('Files')
 @Controller('files')
@@ -27,6 +36,11 @@ export class FilesController {
   ) {}
 
   @Get('product/:imageName')
+  @ApiResponse({ status: 200, description: 'GET Product Image URL' })
+  @ApiResponse({
+    status: 404,
+    description: 'Not found. Product Image not found',
+  })
   findOneProductImage(
     @Res() res: Response,
     @Param('imageName') imageName: string,
@@ -36,6 +50,15 @@ export class FilesController {
   }
 
   @Post('product')
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 201,
+    description: 'Product image was created',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized. Token related' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Token related' })
+  @Auth(ValidRoles.admin)
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter: fileFilter,
@@ -45,6 +68,11 @@ export class FilesController {
       }),
     }),
   )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'File upload',
+    type: FileUploadDto,
+  })
   uploadProductImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('Make sure that file is an image');
