@@ -53,7 +53,6 @@ export class CreateProductDto {
     description: 'Product Slug (unique)',
     example: 'product_abc',
   })
-  @ApiProperty()
   @IsString()
   @IsOptional()
   slug?: string;
@@ -75,7 +74,6 @@ export class CreateProductDto {
     description: 'Product images',
     example: ['http://image1.jpg', 'http://image2.jpg'],
   })
-  @ApiProperty()
   @IsString({ each: true })
   @IsArray()
   @IsOptional()

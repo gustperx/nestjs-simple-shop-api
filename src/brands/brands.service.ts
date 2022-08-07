@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +16,8 @@ import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class BrandsService {
+  private readonly logger = new Logger('Brands');
+
   constructor(
     @InjectRepository(Brand)
     private readonly brandsRepository: Repository<Brand>,
@@ -86,6 +89,7 @@ export class BrandsService {
   private handleDBExceptions(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
 
+    this.logger.log(error);
     throw new InternalServerErrorException(
       'Unexpected error, check server logs',
     );

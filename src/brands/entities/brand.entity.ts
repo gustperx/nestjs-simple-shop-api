@@ -33,7 +33,7 @@ export class Brand {
   }
 
   @BeforeUpdate()
-  checkSlugUpdate() {
+  validNameUpdate() {
     this.validName();
   }
 }
