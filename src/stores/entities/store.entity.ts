@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Product } from '../../products/entities';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -47,6 +50,12 @@ export class Store {
     unique: true,
   })
   slug?: string;
+
+  @ManyToMany(() => Product, (product) => product.stores, {
+    eager: false,
+  })
+  @JoinTable()
+  products?: Product[];
 
   @BeforeInsert()
   checkSlugInsert() {

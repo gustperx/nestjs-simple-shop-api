@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  IsUUID,
   MinLength,
 } from 'class-validator';
 
@@ -78,4 +79,24 @@ export class CreateProductDto {
   @IsArray()
   @IsOptional()
   images?: string[];
+
+  @ApiProperty({
+    minLength: 1,
+    description: 'Product Brand ID',
+    example: '0d6f0da6-14ee-4a87-af7c-07df821e1d11',
+  })
+  @IsUUID()
+  @MinLength(1)
+  brand: string;
+
+  @ApiProperty({
+    description: 'Stores ID',
+    example: [
+      '0d6f0da6-14ee-4a87-af7c-07df821e1d11',
+      '0d6f0da6-14ee-4a87-af7c-07df821e1d22',
+    ],
+  })
+  @IsString({ each: true })
+  @IsArray()
+  stores: string[];
 }

@@ -1,9 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Product } from '../../products/entities';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -26,6 +28,11 @@ export class Brand {
     unique: true,
   })
   name: string;
+
+  @OneToMany(() => Product, (product) => product.brand, {
+    cascade: true,
+  })
+  products?: Product[];
 
   @BeforeInsert()
   validName() {
