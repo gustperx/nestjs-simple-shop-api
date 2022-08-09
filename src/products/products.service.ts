@@ -8,9 +8,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { paginate, Pagination } from 'nestjs-typeorm-paginate';
+
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  ProductPaginationDto,
+} from './dto';
 
 import { validate as isUUID } from 'uuid';
 
@@ -63,21 +67,68 @@ export class ProductsService {
     }
   }
 
-  async findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0 } = paginationDto;
+  async findAll(
+    paginationDto: ProductPaginationDto,
+  ): Promise<Pagination<Product>> {
+    const {
+      limit = 10,
+      offset = 1,
+      productTerm,
+      productDate,
+      productStore,
+      productBrand,
+    } = paginationDto;
 
-    const products = await this.productsRepository.find({
-      take: limit,
-      skip: offset,
-      relations: {
-        images: true,
-      },
-    });
+    const queryBuilder = this.productsRepository.createQueryBuilder('p');
 
-    return products.map((product) => ({
-      ...product,
-      images: product.images.map((image) => image.url),
-    }));
+    if (productTerm) {
+      queryBuilder.andWhere(
+        'LOWER(title) LIKE :title or LOWER(p.model) LIKE :model',
+        {
+          title: `%${productTerm.toLowerCase()}%`,
+          model: `%${productTerm.toLowerCase()}%`,
+        },
+      );
+    }
+
+    if (productDate) {
+      queryBuilder.andWhere('release_date >= :date_unix', {
+        date_unix: productDate,
+      });
+    }
+
+    if (productBrand) {
+      if (!isUUID(productBrand)) {
+        throw new BadRequestException(`Brand is not a UUID`);
+      }
+      queryBuilder
+        .innerJoinAndSelect('p.brand', 'brand')
+        .andWhere('brand.id = :id', { id: productBrand });
+    } else {
+      queryBuilder.leftJoinAndSelect('p.brand', 'brand');
+    }
+
+    if (productStore) {
+      if (!isUUID(productStore)) {
+        throw new BadRequestException(`Store is not a UUID`);
+      }
+      queryBuilder.innerJoinAndSelect(
+        'p.stores',
+        'stores',
+        'stores.id IN (:...productStore)',
+        { productStore: [productStore] },
+      );
+    } else {
+      queryBuilder.leftJoinAndSelect('p.stores', 'store');
+    }
+
+    queryBuilder.leftJoinAndSelect('p.images', 'images');
+
+    try {
+      return paginate<Product>(queryBuilder, { page: offset, limit });
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
   async findOne(term: string) {
@@ -88,11 +139,13 @@ export class ProductsService {
     } else {
       const queryBuilder = this.productsRepository.createQueryBuilder('prod');
       product = await queryBuilder
-        .where('LOWER(title) = :title or slug = :slug', {
+        .where('LOWER(title) = :title or prod.slug = :slug', {
           title: term.toLowerCase(),
           slug: term.toLowerCase(),
         })
-        .leftJoinAndSelect('prod.images', 'prodImages')
+        .leftJoinAndSelect('prod.images', 'productImages')
+        .leftJoinAndSelect('prod.brand', 'productBrand')
+        .leftJoinAndSelect('prod.stores', 'productStores')
         .getOne();
     }
 

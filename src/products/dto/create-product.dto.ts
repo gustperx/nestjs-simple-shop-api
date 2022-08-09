@@ -38,6 +38,14 @@ export class CreateProductDto {
   readonly model: string;
 
   @ApiProperty({
+    example: '1912995045',
+    description: 'Time in UNIX',
+  })
+  @IsNumber()
+  @IsPositive()
+  readonly release_date: number;
+
+  @ApiProperty({
     required: false,
     minLength: 0,
     description: 'Product description',

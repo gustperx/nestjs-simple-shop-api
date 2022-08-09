@@ -74,6 +74,13 @@ export class Product {
   model: string;
 
   @ApiProperty({
+    example: '1912995045',
+    description: 'Time in UNIX',
+  })
+  @Column('numeric')
+  release_date: number;
+
+  @ApiProperty({
     example: ['Shoes', 'Red'],
     description: 'Product tags',
     default: [],

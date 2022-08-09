@@ -15,7 +15,7 @@ import { Product } from './entities';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { ProductPaginationDto } from './dto';
 
 import { Auth } from '../auth/decorators';
 import { ValidRoles } from '../auth/interfaces';
@@ -42,7 +42,7 @@ export class ProductsController {
 
   @Get()
   @ApiResponse({ status: 200, description: 'Product List OK', type: [Product] })
-  findAll(@Query() paginationDto: PaginationDto) {
+  findAll(@Query() paginationDto: ProductPaginationDto) {
     return this.productsService.findAll(paginationDto);
   }
 
