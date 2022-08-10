@@ -15,6 +15,7 @@ import { Product } from './entities';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+
 import { ProductPaginationDto } from './dto';
 
 import { Auth } from '../auth/decorators';

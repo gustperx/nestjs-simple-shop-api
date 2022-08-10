@@ -8,8 +8,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { paginate, Pagination } from 'nestjs-typeorm-paginate';
-
 import {
   CreateProductDto,
   UpdateProductDto,
@@ -67,12 +65,10 @@ export class ProductsService {
     }
   }
 
-  async findAll(
-    paginationDto: ProductPaginationDto,
-  ): Promise<Pagination<Product>> {
+  async findAll(paginationDto: ProductPaginationDto) {
     const {
       limit = 10,
-      offset = 1,
+      offset = 0,
       productTerm,
       productDate,
       productStore,
@@ -82,7 +78,7 @@ export class ProductsService {
     const queryBuilder = this.productsRepository.createQueryBuilder('p');
 
     if (productTerm) {
-      queryBuilder.andWhere(
+      queryBuilder.where(
         'LOWER(title) LIKE :title or LOWER(p.model) LIKE :model',
         {
           title: `%${productTerm.toLowerCase()}%`,
@@ -125,7 +121,19 @@ export class ProductsService {
     queryBuilder.leftJoinAndSelect('p.images', 'images');
 
     try {
-      return paginate<Product>(queryBuilder, { page: offset, limit });
+      const products = await queryBuilder
+        .take(limit)
+        .skip(offset * limit)
+        .getMany();
+
+      return products.map((product) => {
+        return {
+          ...product,
+          images: product.images.map(({ url }) => url),
+          brand: product.brand.name,
+          stores: product.stores.map(({ name, url }) => ({ name, url })),
+        };
+      });
     } catch (error) {
       this.handleDBExceptions(error);
     }
