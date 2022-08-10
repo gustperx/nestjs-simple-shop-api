@@ -52,7 +52,7 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Product OK', type: Product })
   @ApiResponse({ status: 404, description: 'Not found. Product not found' })
   findOne(@Param('term') term: string) {
-    return this.productsService.findOnePlain(term);
+    return this.productsService.findOne(term);
   }
 
   @Patch(':id')

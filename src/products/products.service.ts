@@ -161,14 +161,11 @@ export class ProductsService {
       throw new NotFoundException(`Product with ${term} not found`);
     }
 
-    return product;
-  }
-
-  async findOnePlain(term: string) {
-    const { images = [], ...rest } = await this.findOne(term);
     return {
-      ...rest,
-      images: images.map((image) => image.url),
+      ...product,
+      images: product.images.map(({ url }) => url),
+      brand: product.brand.name,
+      stores: product.stores.map(({ name, url }) => ({ name, url })),
     };
   }
 
@@ -208,7 +205,7 @@ export class ProductsService {
       await queryRunner.commitTransaction();
       await queryRunner.release();
 
-      return this.findOnePlain(id);
+      return this.findOne(id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
@@ -217,7 +214,10 @@ export class ProductsService {
   }
 
   async remove(id: string) {
-    const product = await this.findOne(id);
+    const product = await this.productsRepository.findOneBy({ id });
+    if (!product) {
+      throw new NotFoundException(`Product with ${id} not found`);
+    }
     await this.productsRepository.remove(product);
   }
 
