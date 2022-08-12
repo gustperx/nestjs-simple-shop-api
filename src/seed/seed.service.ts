@@ -13,14 +13,8 @@ export class SeedService {
   ) {}
 
   async runSeed() {
-    await this.deleteTables();
     await this.insertUsers();
     return 'Seed Executed';
-  }
-
-  private async deleteTables() {
-    const queryBuilder = this.usersRepository.createQueryBuilder();
-    await queryBuilder.delete().where({}).execute();
   }
 
   private async insertUsers() {

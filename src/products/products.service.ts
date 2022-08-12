@@ -130,8 +130,8 @@ export class ProductsService {
         return {
           ...product,
           images: product.images.map(({ url }) => url),
-          brand: product.brand.name,
-          stores: product.stores.map(({ name, url }) => ({ name, url })),
+          brand: product.brand,
+          stores: product.stores.map(({ name, url, id }) => ({ name, url, id })),
         };
       });
     } catch (error) {
@@ -164,8 +164,8 @@ export class ProductsService {
     return {
       ...product,
       images: product.images.map(({ url }) => url),
-      brand: product.brand.name,
-      stores: product.stores.map(({ name, url }) => ({ name, url })),
+      brand: product.brand,
+      stores: product.stores.map(({ name, url, id }) => ({ name, url, id })),
     };
   }
 

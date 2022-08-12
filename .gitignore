@@ -32,4 +32,5 @@ lerna-debug.log*
 
 .env
 pgdata
+db
 /static/products/*
